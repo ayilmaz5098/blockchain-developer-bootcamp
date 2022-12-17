@@ -164,33 +164,50 @@ describe(`Token`, () => {
     describe(`Delegated Token Transfers`, () => {
         let amount, transaction, result
         beforeEach(async () => {
-        
-        amount = tokens(100)
-        transaction = await token.connect(deployer).approve(exchange.address, amount)
-        result = await transaction.wait()
-
+         amount = tokens(100)
+         transaction = await token.connect(deployer).approve(exchange.address, amount)
+         result = await transaction.wait()
         })
 
         describe(`Success`, () => {
-
-            beforeEach(async () => {
+         beforeEach(async () => {      
+             transaction = await token.connect(exchange).transferFrom(deployer.address, receiver.address, amount)
+             result = await transaction.wait()
         
-               
-                transaction = await token.connect(exchange).approve(receiver.address, amount)
-                result = await transaction.wait()
-        
-                })
-            
-            it(`transfers token balances`, async () => {
+            })            
 
-                expect(await token.balanceOf(deployer.address)).to.equal(ethers.utils.parseUnits(`999900`,`ethers`))
-                expect(await token.balanceOf(receiver.address)).to.equal(amount)
+        it(`transfers token balances`, async () => 
+            {   
+
+            expect(await token.balanceOf(deployer.address)).to.be.equal(ethers.utils.parseUnits(`999900`,`ether`))
+            expect(await token.balanceOf(receiver.address)).to.be.equal(amount)
+
             })
-            }
+        it(`resets the allowance`, async () => {
+
+            expect(await token.allowance(deployer.address, exchange.address)).to.be.equal(0)
+        })
+        it(`emits a transfer event`, async () => {
+
+            const eventLog= result.events[0]
+            
+            expect(eventLog.args._from).to.be.equal(deployer.address)
+            expect(eventLog.args._to).to.be.equal(receiver.address)
+            expect(eventLog.args._value).to.be.equal(amount)
+            
 
         })
-        describe(`Failure`, () => {
-            
+
         })
+        describe(`Failure`, async () => {
+           it(`rejects sending invalid amount`, async () => {
+             
+            const invalidAmount = tokens(100000000000000000)
+            await expect(token.connect(exchange).transferFrom(deployer.address,receiver.address, invalidAmount)).to.be.reverted
+
+           })
+        })
+
+
     })
-})
+}) 
