@@ -1,0 +1,55 @@
+[1mdiff --git a/contracts/Token.sol b/contracts/Token.sol[m
+[1mindex defeb55..4b001c8 100644[m
+[1m--- a/contracts/Token.sol[m
+[1m+++ b/contracts/Token.sol[m
+[36m@@ -10,13 +10,15 @@[m [mcontract Token{[m
+     uint256 public decimals = 18;[m
+     uint256 public totalSupply = 1000000*(10**decimals);[m
+ [m
+[32m+[m[32m    mapping (address => uint256) public balanceOf;[m
+[32m+[m
+     constructor(string memory _name, string memory _symbol, uint256 _totalSupply) {[m
+ [m
+        name = _name;[m
+        symbol = _symbol;[m
+        totalSupply = _totalSupply * (10**decimals);[m
+ [m
+[31m-[m
+[32m+[m[32m       balanceOf[msg.sender] = totalSupply;[m
+     }[m
+     [m
+ }[m
+[1mdiff --git a/test/Token.js b/test/Token.js[m
+[1mindex 2f6408b..1356450 100644[m
+[1m--- a/test/Token.js[m
+[1m+++ b/test/Token.js[m
+[36m@@ -9,13 +9,16 @@[m [mconst tokens = (n) =>{[m
+ [m
+ describe(`Token`, () => {[m
+ [m
+[31m-    let token [m
+[32m+[m[32m    let token, accounts, deployer[m
+ [m
+     beforeEach( async() => {[m
+         [m
+         const Token = await ethers.getContractFactory(`Token`)[m
+         token = await Token.deploy(`Dapp University`,`DAPP`,1000000)[m
+ [m
+[32m+[m[32m        accounts = await ethers.getSigners()[m
+[32m+[m[32m        deployer = accounts[0][m
+[32m+[m
+     })[m
+ [m
+     describe(`Deployment`, () => {[m
+[36m@@ -54,6 +57,11 @@[m [mdescribe(`Token`, () => {[m
+         expect(await token.totalSupply()).to.equal(totalSupply)[m
+     })[m
+ [m
+[32m+[m[32m    it(`assigns totalSupply to deployer`, async ( ) => {[m
+[32m+[m[41m        [m
+[32m+[m[41m        [m
+[32m+[m[32m        expect(await token.balanceOf(deployer.address)).to.equal(totalSupply)[m
+[32m+[m[32m    })[m
+ })[m
+ [m
+ })[m
