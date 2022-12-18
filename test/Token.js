@@ -200,12 +200,12 @@ describe(`Token`, () => {
 
         })
         describe(`Failure`, async () => {
-           it(`rejects sending invalid amount`, async () => {
+           
              
             const invalidAmount = tokens(100000000000000000)
             await expect(token.connect(exchange).transferFrom(deployer.address,receiver.address, invalidAmount)).to.be.reverted
 
-           })
+           
         })
 
 
