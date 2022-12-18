@@ -59,7 +59,7 @@ describe(`Exchange`, () => {
         expect(await token1.balanceOf(exchange.address)).to.be.equal(amount)
         expect(await exchange.tokens(token1.address, user1.address)).to.be.equal(amount)
         expect(await exchange.balanceOf(token1.address, user1.address)).to.be.equal(amount)
-       // expect(await exchange.balanceOf(token1.address, user1.address)).to.be.equal(amount)
+       )
 
       })
 
@@ -81,5 +81,36 @@ describe(`Exchange`, () => {
         
       })
     })
+  })
+
+  describe(`Withdrawing Tokens`, () => {
+
+    beforeEach( async () => {
+      //approve
+      transaction = await token1.connect(user1).approve(exchange.address, amount)
+      result = await transaction.wait()
+      //deposit token
+      transaction = await exchange.connect(user1).depositToken(token1.address, amount)
+      result = await transaction.wait()
+      //withdraw token
+      transaction = await exchange.connect(user1).withdrawToken(token1.address, amount)
+      result = await transaction.wait()
+    })
+
+    it(`withdraws token funds`, async () => {
+
+        expect(await token1.balanceOf(exchange.address)).to.be.equal(0)
+        expect(await exchange.tokens(token1.address, user1.address)).to.be.equal(0)
+        expect(await exchange.balanceOf(token1.address, user1.address)).to.be.equal(0)
+
+    })
+
+    it(`emits a withdraw event`, async () =>{
+
+      eventLog = result.events[1]
+      expect(eventLog.event).to.be.equal(`Withdraw`)
+
+    })
+
   })
 })
