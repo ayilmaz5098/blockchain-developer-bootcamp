@@ -24,10 +24,11 @@ contract Exchange {
         emit Deposit(_token, msg.sender, _amount, tokens[_token][msg.sender]);
     }
 
-    function withdrawToken(address _token, uint256 amount) public {
+    function withdrawToken(address _token, uint256  amount) public {
 
+        require(tokens[_token][msg.sender] >= amount);
         Token(_token).transfer(msg.sender, amount);
-        tokens[_token][msg.sender] = tokens[_token][msg.sender] + amount;
+        tokens[_token][msg.sender] = tokens[_token][msg.sender] - amount;
         emit Withdraw(_token, msg.sender, amount, tokens[_token][msg.sender]);
     }
 
