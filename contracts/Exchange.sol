@@ -10,6 +10,7 @@ contract Exchange {
     uint256 public feePercent;
     mapping(address => mapping(address => uint256)) public tokens; // using token address we can see how many tokens each individual user has // orders mapping
     mapping(uint256 => _Order) orders;
+    mapping(uint256 => bool) public orderCanceled;
     uint256 public orderCount;
 
     event Deposit(address token, address user, uint256 amount, uint256 balance);
@@ -78,7 +79,16 @@ contract Exchange {
         emit Order(orderCount, msg.sender, _tokenGet, _amountGet, _tokenGive,  _amountGive, block.timestamp);
      }
 
+    function cancelOrder(uint256 _id) public {
+    //fetch the order
 
+    _Order storage _order = orders[_id];
+
+
+    orderCanceled[_id] = true;
+    //cancel the order
+
+    }
 
 
 
