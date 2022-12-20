@@ -16,7 +16,7 @@ describe(`Exchange`, () => {
     const Token = await ethers.getContractFactory(`Token`)
 
     token1 = await Token.deploy('Dapp University', 'DAPP', '1000000')
-
+    token2 = await Token.deploy(`Mokc Dai`, `mDAI`,`1000000`)
     accounts = await ethers.getSigners()
     deployer = accounts[0]
     feeAccount = accounts[1]  
@@ -148,4 +148,50 @@ describe(`Exchange`, () => {
     })
 
   })
+
+  describe(`Making Orders`, () => {
+    let transaction, result
+    let amount = tokens(1)
+
+    describe(`Success`, async () => {
+
+      beforeEach(async () => {
+        // deposit tokens before making order
+        transaction = await token1.connect(user1).approve(exchange.address, amount)
+        result = await transaction.wait()
+
+        transaction = await exchange.connect(user1).depositToken(token1.address, amount)
+        result = await transaction.wait()
+
+        transaction = await exchange.connect(user1).makeOrder(token2.address, tokens(1), token1.address, tokens(1))
+        result = await transaction.wait()
+
+      })
+
+      it(`tracks the newly created order`, async () => {
+
+        expect(await exchange.orderCount()).to.equal(1)
+
+      })
+
+      it(`emits an order event`, async () => {
+
+        const eventLog = result.events[0]
+        expect(eventLog.event).to.equal(`Order`)
+        expect(eventLog.args.id).to.equal(1)
+        expect(eventLog.args.user).to.equal(user1.address)
+        expect(eventLog.args.tokenGet).to.equal(token2.address)
+        expect(eventLog.args.amountGet).equal(tokens(1))
+        expect(eventLog.args.tokenGive).to.equal(token1.address)
+        expect(eventLog.args.amountGive).to.equal(tokens(1))
+        expect(eventLog.args.timestamp).to.at.least(1)
+      })
+    })
+
+    describe(`Failure`, async () => {
+
+
+    })
+  })
+
 })
