@@ -15,16 +15,9 @@ contract Exchange {
 
     event Deposit(address token, address user, uint256 amount, uint256 balance);
     event Withdraw(address token, address user, uint256 amount, uint256 balance);
-    event Order(
-        uint256 id,
-        address user,
-        address tokenGet,
-        uint256 amountGet,
-        address tokenGive,
-        uint256 amountGive,
-        uint256 timestamp
+    event Order(uint256 id, address user, address tokenGet, uint256 amountGet, address tokenGive, uint256 amountGive,uint256 timestamp);
+    event Cancel(uint256 id, address user, address tokenGet, uint256 amountGet, address tokenGive, uint256 amountGive,uint256 timestamp);
 
-    );
                         //way to model the order
     struct _Order {    //attributes of an order
     uint256 id;         //unique identifier for order
@@ -68,26 +61,34 @@ contract Exchange {
     function makeOrder(address _tokenGet, uint256 _amountGet, address _tokenGive, uint256 _amountGive) public 
     {          
 
-        //prevent orders if tokens are not on exhange
-        require(balanceOf(_tokenGive, msg.sender) >= _amountGive);
+    //prevent orders if tokens are not on exhange
+    require(balanceOf(_tokenGive, msg.sender) >= _amountGive);
 
-        //CREATE ORDER
-        orderCount ++;
-        orders[orderCount] = _Order(orderCount, msg.sender, _tokenGet, _amountGet, _tokenGive,  _amountGive, block.timestamp);
-        // emit event
+    //CREATE ORDER
+    orderCount ++;
+    orders[orderCount] = _Order(orderCount, msg.sender, _tokenGet, _amountGet, _tokenGive,  _amountGive, block.timestamp);
+    // emit event
 
-        emit Order(orderCount, msg.sender, _tokenGet, _amountGet, _tokenGive,  _amountGive, block.timestamp);
-     }
+    emit Order(orderCount, msg.sender, _tokenGet, _amountGet, _tokenGive,  _amountGive, block.timestamp);
+    }
 
     function cancelOrder(uint256 _id) public {
-    //fetch the order
-
+    //fetch the order   
     _Order storage _order = orders[_id];
 
+    //Ensure the caller of the function is the owner of the order
+    require(address(_order.user )== msg.sender);
 
+    // order must exist
+    require(_order.id == _id);
+
+    //Cancel the order
     orderCanceled[_id] = true;
-    //cancel the order
 
+    //cancel the order
+    emit Cancel(_order.id, msg.sender,_order.tokenGet, _order.amountGet, _order.tokenGive, _order.amountGive, block.timestamp);
+
+    
     }
 
 

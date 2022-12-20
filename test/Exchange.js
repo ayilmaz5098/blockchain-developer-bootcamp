@@ -21,6 +21,7 @@ describe(`Exchange`, () => {
     deployer = accounts[0]
     feeAccount = accounts[1]  
     user1 = accounts[2]
+    user2 = accounts[3]
 
 
     let transaction = await token1.connect(deployer).transfer(user1.address, tokens(100))    
@@ -229,15 +230,49 @@ describe(`Exchange`, () => {
 
         })
 
+        it(`emits a cancel event`, async () => {
+
+          const eventLog = result.events[0]
+
+          expect(eventLog.event).to.be.equal(`Cancel`)
+          expect(eventLog.args.id).to.be.equal(1)
+          expect(eventLog.args.user).to.be.equal(user1.address)
+          expect(eventLog.args.tokenGet).to.be.equal(token2.address)
+          expect(eventLog.args.amountGet).to.be.equal(tokens(1))
+          expect(eventLog.args.tokenGive).to.be.equal(token1.address)
+          expect(eventLog.args.amountGive).to.be.equal(tokens(1))
+          expect(eventLog.args.timestamp).to.at.least(1)
+        })
+
       })
 
       describe(`Failure`, async () => {
+        beforeEach( async () => {
+          transaction = await token1.connect(user1).approve(exchange.address, amount)
+          result = await transaction.wait()
+
+          transaction = await exchange.connect(user1).depositToken(token1.address, amount)
+          result = await transaction.wait()
+
+          transaction = await exchange.connect(user1).makeOrder(token2.address, amount, token1.address, amount)
+          result = await transaction.wait()
+        })
+
+        it(`rejects invalid order ids`, async () => {
+          const invalidOrderId = 9999
+          await expect(exchange.connect(user1).cancelOrder(invalidOrderId)).to.be.reverted
+        })
+
+        it(`rejects unauthorized cancelations`, async () => {
+
+          await expect(exchange.connect(user2).cancelOrder(1)).to.be.reverted
+
+        })
 
 
       })
 
     })
-
 
   })
 
