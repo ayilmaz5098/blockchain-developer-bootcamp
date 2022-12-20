@@ -11,13 +11,14 @@ contract Exchange {
     mapping(address => mapping(address => uint256)) public tokens; // using token address we can see how many tokens each individual user has // orders mapping
     mapping(uint256 => _Order) orders;
     mapping(uint256 => bool) public orderCanceled;
+    mapping(uint256 => bool) public orderFilled;
     uint256 public orderCount;
 
     event Deposit(address token, address user, uint256 amount, uint256 balance);
     event Withdraw(address token, address user, uint256 amount, uint256 balance);
     event Order(uint256 id, address user, address tokenGet, uint256 amountGet, address tokenGive, uint256 amountGive,uint256 timestamp);
     event Cancel(uint256 id, address user, address tokenGet, uint256 amountGet, address tokenGive, uint256 amountGive,uint256 timestamp);
-
+    event Trade(uint256 id, address user, address tokenGet, uint256 amountGet, address tokenGive, uint256 amountGive, address creator, uint256 timeStamp);
                         //way to model the order
     struct _Order {    //attributes of an order
     uint256 id;         //unique identifier for order
@@ -77,7 +78,7 @@ contract Exchange {
     _Order storage _order = orders[_id];
 
     //Ensure the caller of the function is the owner of the order
-    require(address(_order.user )== msg.sender);
+    require(address(_order.user) == msg.sender);
 
     // order must exist
     require(_order.id == _id);
@@ -90,6 +91,47 @@ contract Exchange {
 
     
     }
+
+    //----EXECUTING ORDER
+    function fillOrder(uint256 id) public {
+    //must be valid orderID
+    require(!orderCanceled[id]);
+    require(!orderFilled[id]);
+    require(id <= orderCount && id > 0);
+    //order cant be filled
+    //oder cant be cancelled
+     //Fetch order
+    _Order storage _order = orders[id];
+
+
+     //Swapping Tokens(trading)
+    _trade(_order.id, _order.user, _order.tokenGet, _order.amountGet, _order.tokenGive,_order.amountGive);
+
+    orderFilled[id] = true;
+
+    }
+
+    function _trade(uint256 _orderId, address _user, address _tokenGet, uint256 _amountGet, address _tokenGive, uint256 _amountGive) internal 
+    {
+
+    uint256 _feeAmount =(_amountGet*feePercent) / 100;
+    // fee is paid by the user who filled the order(msg.sender)
+    //msg.sender is the user who filled the order while _user is who created the order
+    // do trade inside of here
+    tokens[_tokenGet][msg.sender] = tokens[_tokenGet][msg.sender] - (_amountGet + _feeAmount) ; // we gave tokenGet, mDAI, deducted it from user2,creator,msg.sender. gave it to user, 
+    tokens[_tokenGet][_user] = tokens[_tokenGet][_user] + _amountGet;
+    //charge fees
+    tokens[_tokenGet][feeAccount] = tokens[_tokenGet][feeAccount] + _feeAmount; 
+    
+    tokens[_tokenGive][msg.sender] = tokens[_tokenGive][msg.sender] + _amountGive;
+    tokens[_tokenGive][_user] = tokens[_tokenGive][_user] - _amountGive;
+
+    emit Trade(_orderId, msg.sender, _tokenGet, _amountGet, _tokenGive, _amountGive, _user, block.timestamp);
+
+    }
+
+
+
 
 
 
