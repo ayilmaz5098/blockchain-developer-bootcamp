@@ -190,7 +190,9 @@ describe(`Exchange`, () => {
 
     describe(`Failure`, async () => {
 
-
+      it(`rejects with no balance`, async () => {
+        await expect(exchange.connect(user1).makeOrder(token2.address, amount, token1.address, amount)).to.be.reverted
+      })
     })
   })
 

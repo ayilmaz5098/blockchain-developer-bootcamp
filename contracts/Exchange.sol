@@ -10,7 +10,7 @@ contract Exchange {
     uint256 public feePercent;
     mapping(address => mapping(address => uint256)) public tokens; // using token address we can see how many tokens each individual user has // orders mapping
     mapping(uint256 => _Order) orders;
-    uint256 public orderCount = 0;
+    uint256 public orderCount;
 
     event Deposit(address token, address user, uint256 amount, uint256 balance);
     event Withdraw(address token, address user, uint256 amount, uint256 balance);
@@ -66,6 +66,10 @@ contract Exchange {
  
     function makeOrder(address _tokenGet, uint256 _amountGet, address _tokenGive, uint256 _amountGive) public 
     {          
+
+        //prevent orders if tokens are not on exhange
+        require(balanceOf(_tokenGive, msg.sender) >= _amountGive);
+
         //CREATE ORDER
         orderCount ++;
         orders[orderCount] = _Order(orderCount, msg.sender, _tokenGet, _amountGet, _tokenGive,  _amountGive, block.timestamp);
