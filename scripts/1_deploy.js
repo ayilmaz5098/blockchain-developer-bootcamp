@@ -3,15 +3,33 @@ const { ethers } = require("hardhat");
 
 async function main() { 
 
-    //fetch the contract
+    //fetch the contract to deplou
     const Token = await ethers.getContractFactory("Token")
-    //deploy the contract
+    const Exchange = await ethers.getContractFactory('Exchange')
 
-    const token = await Token.deploy()
+    const accounts = await ethers.getSigners()
 
-    await token.deployed()
+    console.log(`Accounts fetched:n${accounts[0].address}/n${accounts[1].address}/n`)
+     //deploy the contract
 
-    console.log(`Token deployed to: ${token.address} `)
+
+    const dapp = await Token.deploy(`Dapp University`, `DAPP`, `1000000`)
+    await dapp.deployed()
+    console.log(`DAPP deployed to: ${dapp.address}`)
+    
+    const mETH = await Token.deploy(`mETH`, `mETH`, `1000000`)
+    await mETH.deployed()
+    console.log(`mETH Deployed to: ${mETH.address}`)
+
+    const mDAI = await Token.deploy(`mDAI`, `mDAI`, `1000000`)
+    await mDAI.deployed()
+    console.log(`mDAI Deployed to: ${mDAI.address}`)
+
+    //deploy exhange
+
+    const exchange = await Exchange.deploy(accounts[1].address, 10) //constructor function of exchange sc, takes 2 args, feeaccount address and feepercentage
+    await exchange.deployed()
+    console.log(`Exhange Deployed to: ${exchange.address}`)
 }
 
 main()

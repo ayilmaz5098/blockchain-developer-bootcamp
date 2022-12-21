@@ -339,6 +339,7 @@ describe(`Exchange`, () => {
         transaction = await exchange.connect(user1).cancelOrder(1)
         await transaction.wait()
         await expect(exchange.connect(user2).fillOrder(1)).to.be.reverted
+        
       })
        
       })

@@ -124,7 +124,7 @@ describe(`Token`, () => {
         })
     })
 
-    describe(`Approving Tokens`, () => {
+       describe(`Approving Tokens`, () => {
         let amount, transaction, result
         beforeEach(async () => {
 
