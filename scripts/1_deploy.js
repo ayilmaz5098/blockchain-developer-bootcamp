@@ -30,6 +30,8 @@ async function main() {
     const exchange = await Exchange.deploy(accounts[1].address, 10) //constructor function of exchange sc, takes 2 args, feeaccount address and feepercentage
     await exchange.deployed()
     console.log(`Exhange Deployed to: ${exchange.address}`)
+
+    console.log(accounts)
 }
 
 main()

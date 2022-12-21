@@ -208,6 +208,7 @@ describe(`Token`, () => {
            
         })
 
+        console.log(accounts)
 
     })
 }) 
