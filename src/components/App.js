@@ -4,7 +4,7 @@ import { useDispatch } from 'react-redux';
 import { ethers } from 'ethers';
 import config from '../config.json';
 import store from '../store/store';
-import { loadProvider, loadNetwork, loadAccount, loadToken} from '../store/interactions';
+import { loadProvider, loadNetwork, loadAccount, loadTokens, loadExchange} from '../store/interactions';
 
 
 function App() {
@@ -12,19 +12,28 @@ function App() {
     const dispatch = useDispatch()
 
     const loadBlockchainData = async () => {
-      await loadAccount(dispatch)//await window.ethereum.request({method: `eth_requestAccounts`})
+     //await window.ethereum.request({method: `eth_requestAccounts`})
  
       
       //Connect Ethers to blockchain
       const provider = loadProvider(dispatch)// new ethers.providers.Web3Provider(window.ethereum)
       //dispatch({type:`PROVIDER_LOADED`, connection: provider })//store.dispatch we were using that before defining dispatch 5 satir ustte
-      //const chainId  = 
+      //fetch current networks chanId hardhat 31337, kovan 42
       const chainId = await loadNetwork(provider, dispatch)//await provider.getNetwork()
       //console.log(config[chainId])
       //Token Smart Contract
-      
+
+    //fetch current accoun balance from metamask
+      await loadAccount(provider,dispatch)
+
+      //load token smart contracts
+      const DApp = config[chainId].Dapp
+      const mETH = config[chainId].mETH
       //console.log(token.address)
-      await loadToken(provider, config[chainId].Dapp.address,dispatch)
+      await loadTokens(provider,[DApp.address, mETH.address],dispatch)
+      //load exchange smart contract
+      await loadExchange(provider,config[chainId].exchange.address , dispatch)
+      
       //const symbol = await token.symbol()
       //console.log(symbol)
 
@@ -38,16 +47,16 @@ function App() {
 
 
       //Token Smart Contract
-    }
+}
     
-    useEffect(() => {
+useEffect(() => {
 
       loadBlockchainData()
 
 
     })
 
-    return (
+return (
       <div>
   
         {/* Navbar */}
@@ -80,6 +89,6 @@ function App() {
       </div>
     );
     
-  }
+}
   export default App;
 
