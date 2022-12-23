@@ -1,30 +1,32 @@
 import logo from '../logo.svg';
 import { useEffect } from 'react';
+import { useDispatch } from 'react-redux';
 import { ethers } from 'ethers';
 import config from '../config.json';
-import TOKEN_ABI from '../abis/Token.json';
-import '../App.css';
-
-
+import store from '../store/store';
+import { loadProvider, loadNetwork, loadAccount, loadToken} from '../store/interactions';
 
 
 function App() {
 
+    const dispatch = useDispatch()
 
     const loadBlockchainData = async () => {
+      await loadAccount(dispatch)//await window.ethereum.request({method: `eth_requestAccounts`})
+ 
       
-      const accounts = await window.ethereum.request({method: `eth_requestAccounts`})
-      console.log(accounts[0])
-
-      const provider= new ethers.providers.Web3Provider(window.ethereum)
-      const {chainId} = await provider.getNetwork()
-      console.log(chainId)
-
-      console.log(config[chainId])
-      const token = new ethers.Contract(config[chainId].Dapp.address,TOKEN_ABI ,provider)
-      console.log(token.address)
-      const symbol = await token.symbol()
-      console.log(symbol)
+      //Connect Ethers to blockchain
+      const provider = loadProvider(dispatch)// new ethers.providers.Web3Provider(window.ethereum)
+      //dispatch({type:`PROVIDER_LOADED`, connection: provider })//store.dispatch we were using that before defining dispatch 5 satir ustte
+      //const chainId  = 
+      const chainId = await loadNetwork(provider, dispatch)//await provider.getNetwork()
+      //console.log(config[chainId])
+      //Token Smart Contract
+      
+      //console.log(token.address)
+      await loadToken(provider, config[chainId].Dapp.address,dispatch)
+      //const symbol = await token.symbol()
+      //console.log(symbol)
 
       //Token Smart Contract-create a connection-we use ether.js little bit different then how we use it in test
       //we are pulling the ethers from hardhat library in test stage
@@ -77,6 +79,7 @@ function App() {
   
       </div>
     );
+    
   }
-  
   export default App;
+
