@@ -1,94 +1,83 @@
-import logo from '../logo.svg';
 import { useEffect } from 'react';
 import { useDispatch } from 'react-redux';
-import { ethers } from 'ethers';
 import config from '../config.json';
-import store from '../store/store';
-import { loadProvider, loadNetwork, loadAccount, loadTokens, loadExchange} from '../store/interactions';
 
+import {
+  loadProvider,
+  loadNetwork,
+  loadAccount,
+  loadTokens,
+  loadExchange
+} from '../store/interactions';
+
+import Navbar from './Navbar'
 
 function App() {
+  const dispatch = useDispatch()
 
-    const dispatch = useDispatch()
+  const loadBlockchainData = async () => {
+    // Connect Ethers to blockchain
+    const provider = loadProvider(dispatch)
 
-    const loadBlockchainData = async () => {
-     //await window.ethereum.request({method: `eth_requestAccounts`})
- 
-      
-      //Connect Ethers to blockchain
-      const provider = loadProvider(dispatch)// new ethers.providers.Web3Provider(window.ethereum)
-      //dispatch({type:`PROVIDER_LOADED`, connection: provider })//store.dispatch we were using that before defining dispatch 5 satir ustte
-      //fetch current networks chanId hardhat 31337, kovan 42
-      const chainId = await loadNetwork(provider, dispatch)//await provider.getNetwork()
-      //console.log(config[chainId])
-      //Token Smart Contract
+    // Fetch current network's chainId (e.g. hardhat: 31337, kovan: 42)
+    const chainId = await loadNetwork(provider, dispatch)
 
-    //fetch current accoun balance from metamask
-      await loadAccount(provider,dispatch)
-
-      //load token smart contracts
-      const DApp = config[chainId].Dapp
-      const mETH = config[chainId].mETH
-      //console.log(token.address)
-      await loadTokens(provider,[DApp.address, mETH.address],dispatch)
-      //load exchange smart contract
-      await loadExchange(provider,config[chainId].exchange.address , dispatch)
-      
-      //const symbol = await token.symbol()
-      //console.log(symbol)
-
-      //Token Smart Contract-create a connection-we use ether.js little bit different then how we use it in test
-      //we are pulling the ethers from hardhat library in test stage
-      //NOW WE are pulling the ethers from ethers here, llok at the description of ethers in both here and testjs file, like how we import
-
-      //Connect Ethers to Blockchain
-
-
-
-
-      //Token Smart Contract
-}
-    
-useEffect(() => {
-
-      loadBlockchainData()
-
-
+    // Reload page when network changes
+    window.ethereum.on('chainChanged', () => {
+      window.location.reload()
     })
 
-return (
-      <div>
-  
-        {/* Navbar */}
-  
-        <main className='exchange grid'>
-          <section className='exchange__section--left grid'>
-  
-            {/* Markets */}
-  
-            {/* Balance */}
-  
-            {/* Order */}
-  
-          </section>
-          <section className='exchange__section--right grid'>
-  
-            {/* PriceChart */}
-  
-            {/* Transactions */}
-  
-            {/* Trades */}
-  
-            {/* OrderBook */}
-  
-          </section>
-        </main>
-  
-        {/* Alert */}
-  
-      </div>
-    );
-    
-}
-  export default App;
+    // Fetch current account & balance from Metamask when changed
+    window.ethereum.on('accountsChanged', () => {
+      loadAccount(provider, dispatch)
+    })
 
+    // Load token smart contracts
+    const DApp = config[chainId].DApp
+    const mETH = config[chainId].mETH
+    await loadTokens(provider, [DApp.address, mETH.address], dispatch)
+
+    // Load exchange smart contract
+    const exchangeConfig = config[chainId].exchange
+    await loadExchange(provider, exchangeConfig.address, dispatch)
+  }
+
+  useEffect(() => {
+    loadBlockchainData()
+  })
+
+  return (
+    <div>
+
+      <Navbar />
+
+      <main className='exchange grid'>
+        <section className='exchange__section--left grid'>
+
+          {/* Markets */}
+
+          {/* Balance */}
+
+          {/* Order */}
+
+        </section>
+        <section className='exchange__section--right grid'>
+
+          {/* PriceChart */}
+
+          {/* Transactions */}
+
+          {/* Trades */}
+
+          {/* OrderBook */}
+
+        </section>
+      </main>
+
+      {/* Alert */}
+
+    </div>
+  );
+}
+
+export default App;
