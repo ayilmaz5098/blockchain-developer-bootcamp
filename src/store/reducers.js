@@ -9,53 +9,123 @@ export const provider = (state = {}, action) => {
       return {
         ...state,
         chainId: action.chainId
-    }
+      }
     case 'ACCOUNT_LOADED':
       return {
         ...state,
         account: action.account
-    }
+      }
     case 'ETHER_BALANCE_LOADED':
       return {
         ...state,
         balance: action.balance
-    }
-      default:
-      return state
-    }
-  
-}
-const TOKENS_STATE_DEFAULT={ loaded: false, contracts: [], symbols: [] }
-export const tokens =(state = TOKENS_STATE_DEFAULT , action) => {
+      }
 
-  switch(action.type) {
+    default:
+      return state
+  }
+}
+
+const DEFAULT_TOKENS_STATE = {
+  loaded: false,
+  contracts: [],
+  symbols: []
+}
+
+export const tokens = (state = DEFAULT_TOKENS_STATE, action) => {
+  switch (action.type) {
     case 'TOKEN_1_LOADED':
-      return{
+      return {
         ...state,
         loaded: true,
-        contracts: [...state.contracts, action.token],
-        symbols: [...state.symbols,action.symbol]
+        contracts: [action.token],
+        symbols: [action.symbol]
+      }
+    case 'TOKEN_1_BALANCE_LOADED':
+      return {
+        ...state,
+        balances: [action.balance]
+
       }
     case 'TOKEN_2_LOADED':
-      return{
+      return {
         ...state,
         loaded: true,
         contracts: [...state.contracts, action.token],
-        symbols: [...state.symbols,action.symbol]      }
-      default:
-        return state
+        symbols: [...state.symbols, action.symbol]
+      }
+      case 'TOKEN_2_BALANCE_LOADED':
+        return {
+          ...state,
+          balances: [...state.balances, action.balance]
+        }
+
+        default:
+         return state
   }
 }
-export const exchange= (state = {loaded:false,contract: {}},action) => {
-  switch(action.type) {
+
+const DEFAULT_EXCHANGE_STATE = { 
+  loaded: false, 
+  contract: {}, 
+  transaction: { 
+    isSuccessful: false
+  },
+  events: [] 
+}
+export const exchange = (state = DEFAULT_EXCHANGE_STATE, action) => {
+  switch (action.type) {
     case 'EXCHANGE_LOADED':
+      return {
+        ...state,
+        loaded: true,
+        contract: action.exchange
+      }
+    case 'EXCHANGE_TOKEN_1_BALANCE_LOADED':
+      return {
+        ...state,
+        balances: [action.balance]
+      }
+    case 'EXCHANGE_TOKEN_2_BALANCE_LOADED':
+      return {
+        ...state,
+        balances: [...state.balances, action.balance]
+      }
+      /////-------------------------------------
+      ///TRANSFER CASES(DEPOSITST &&&WITHDRAWS)
+    case 'TRANSFER_REQUEST':
       return{
         ...state,
-        loaded:true,
-        contract:action.exchange
+        transaction: {
+          transactionType: 'Transfer',
+          isPending: true,
+          isSuccessful: false
+        },
+        transferInProgress: true
       }
-
+    case 'TRANSFER_SUCCESS':
+      return {
+        ...state,
+        transaction: {
+          transactionType: 'Transfer',
+          isPending: false,
+          isSuccessful: true
+        },
+        transferInProgress: false,
+        events: [action.event, ...state.events] //events key
+      }
+    case 'TRANSFER_FAIL':
+      return {
+        ...state,
+        transaction: {
+          transactionType: 'Transger',
+          isPending: false,
+          isSuccessful: false,
+          isError: true
+        },
+        transferInProgress: false,
+        }
       default:
        return state
-  }
- }
+  } 
+}
