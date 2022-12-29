@@ -79,8 +79,8 @@ async function main() {
     result = await transaction.wait()
     console.log(`Made order from ${user1.address}`)  
     //user1 cancels the order
-   
-    orderId = result.events[0].args.id
+    
+    orderId = ( result.events[0].args.id)
     transaction = await exchange.connect(user1).cancelOrder(orderId)
     result = await transaction.wait()
     console.log(`Cancelled order from ${user1.address}/n`)
@@ -97,7 +97,7 @@ async function main() {
     
     
     
-    orderId = result.events[0].args.id
+    orderId = ( result.events[0].args.id)
 
     transaction = await exchange.connect(user2).fillOrder(orderId)
     result = await transaction.wait()

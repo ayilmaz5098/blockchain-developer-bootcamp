@@ -14,7 +14,7 @@ import {
 import Navbar from './Navbar'
 import Markets from './Markets'
 import Balance from './Balance'
-import { exchange } from '../store/reducers';
+
 function App() {
   const dispatch = useDispatch()
 
@@ -24,7 +24,7 @@ function App() {
 
     // Fetch current network's chainId (e.g. hardhat: 31337, kovan: 42)
     const chainId = await loadNetwork(provider, dispatch)
-    
+
     // Reload page when network changes
     window.ethereum.on('chainChanged', () => {
       window.location.reload()
@@ -34,20 +34,19 @@ function App() {
     window.ethereum.on('accountsChanged', () => {
       loadAccount(provider, dispatch)
     })
-    
+
     // Load token smart contracts
     const DApp = config[chainId].DApp
     const mETH = config[chainId].mETH
     await loadTokens(provider, [DApp.address, mETH.address], dispatch)
-    
+
     // Load exchange smart contract
     const exchangeConfig = config[chainId].exchange
     const exchange = await loadExchange(provider, exchangeConfig.address, dispatch)
-    //listen to events
+
+    // Listen to events
     subscribeToEvents(exchange, dispatch)
-
   }
-
 
   useEffect(() => {
     loadBlockchainData()
