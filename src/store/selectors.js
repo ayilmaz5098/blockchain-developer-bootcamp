@@ -54,6 +54,64 @@ const decorateOrder = (order, tokens) => {
     formattedTimestamp: moment.unix(order.timestamp).format('h:mm:ssa d MMM D')
   })
 }
+//----------------------------
+//ALL FILLED ORDERS
+export const filledOrdersSelector = createSelector(
+  filledOrders,
+  tokens,
+  (orders, tokens) => {
+    //get filled orders and tokens from state and build sth meaningful to show in UI
+    if (!tokens[0] || !tokens[1]) {return}
+    //filter orders by selected tokens
+    orders = orders.filter((o) => o.tokenGet === tokens[0].address || o.tokenGet === tokens[1].address)
+    orders = orders.filter((o) => o.tokenGive === tokens[0].address || o.tokenGive === tokens[1].address)
+    orders = orders.sort((a,b) => a.timestamp - b.timestamp)
+    /* step1:sort orders by time ascending
+       step2:apply order colors(decorate orders)
+       step3: sort orders by time descending for UI 
+       step4: sort orders by time ascending for price comparison */  
+       
+    orders = decorateFilledOrders(orders, tokens)
+    orders = orders.sort((a,b) => b.timestamp - a.timestamp)
+    console.log(orders)
+    return orders
+  }
+)
+const decorateFilledOrders = (orders, tokens) => {
+  let previousOrder = orders[0]
+  return(orders.map((order) => {
+    //decorate each individual order
+    order =  decorateOrder(order, tokens)
+    order = decorateFilledOrder(order, previousOrder)
+    return order
+    })
+  )
+}
+const decorateFilledOrder = (order, previousOrder) => {
+  return({
+    ...order,
+    tokenPriceClass: tokenPriceClass(order.tokenPrice, order.id, previousOrder)
+  })
+}
+const tokenPriceClass = (tokenPrice, orderId, previousOrder) => {
+  if (previousOrder.id === orderId) {
+    return GREEN
+  }
+  if (previousOrder.tokenPrice <= tokenPrice) {
+    return GREEN
+  } else {
+    return RED
+  }
+}
+
+
+
+
+
+
+
+
+
 
 // ------------------------------------------------------------------------------
 // ORDER BOOK
