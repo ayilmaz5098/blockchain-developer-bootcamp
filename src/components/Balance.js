@@ -43,7 +43,7 @@ const Balance = () => {
   }
 
   const amountHandler = (e, token) => {
-    if (token.address === tokens[0].address) {
+    if (token?.address === tokens[0]?.address) {
       setToken1TransferAmount(e.target.value)
     } else {
       setToken2TransferAmount(e.target.value)
@@ -53,7 +53,7 @@ const Balance = () => {
   const depositHandler = (e, token) => {
     e.preventDefault()
 
-    if (token.address === tokens[0].address) {
+    if (token?.address === tokens[0]?.address) {
       transferTokens(provider, exchange, 'Deposit', token, token1TransferAmount, dispatch)
       setToken1TransferAmount(0)
     } else {
@@ -77,7 +77,7 @@ const Balance = () => {
   }
 
   useEffect(() => {
-    if(exchange && tokens[0] && tokens[1] && account) {
+    if(exchange && tokens[0] && tokens[1] && account && dispatch) {
       loadBalances(exchange, tokens, account, dispatch)
     }
   }, [exchange, tokens, account, transferInProgress])

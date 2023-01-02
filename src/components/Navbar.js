@@ -17,7 +17,7 @@ const Navbar = () => {
   const dispatch = useDispatch()
 
   const connectHandler = async () => {
-    await loadAccount(provider, dispatch)
+    await loadAccount( provider, dispatch)
   }
 
   const networkHandler = async (e) => {

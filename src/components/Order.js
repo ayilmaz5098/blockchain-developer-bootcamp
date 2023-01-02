@@ -34,7 +34,7 @@ const Order = () => {
     }
     const sellHandler = (e) => {
         e.preventDefault()
-        makeSellOrder(provider, exchange, tokens, { amount, price }, dispatch)
+        makeSellOrder(provider && provider, exchange && exchange, tokens && tokens, { amount, price }, dispatch)
         setAmount(0)
         setPrice(0)
     }
