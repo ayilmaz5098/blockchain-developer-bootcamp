@@ -81,6 +81,7 @@ const DEFAULT_EXCHANGE_STATE = {
 
 export const exchange = (state = DEFAULT_EXCHANGE_STATE, action) => {
   let index, data
+
   switch (action.type) {
     case 'EXCHANGE_LOADED':
       return {
@@ -88,7 +89,11 @@ export const exchange = (state = DEFAULT_EXCHANGE_STATE, action) => {
         loaded: true,
         contract: action.exchange
       }
-    case 'CANCELLED_ORDERS_LOADED' :
+
+    // ------------------------------------------------------------------------------
+    // ORDERS LOADED (CANCELLED, FILLED & ALL)
+
+    case 'CANCELLED_ORDERS_LOADED':
       return {
         ...state,
         cancelledOrders: {
@@ -96,20 +101,63 @@ export const exchange = (state = DEFAULT_EXCHANGE_STATE, action) => {
           data: action.cancelledOrders
         }
       }
-    case 'FILLED_ORDERS_LOADED' :
+
+    case 'FILLED_ORDERS_LOADED':
       return {
         ...state,
         filledOrders: {
-            loaded: true,
-            data: action.filledOrders
-          }
-        }  
-    case 'ALL_ORDERS_LOADED' :
+          loaded: true,
+          data: action.filledOrders
+        }
+      }
+
+    case 'ALL_ORDERS_LOADED':
       return {
         ...state,
         allOrders: {
           loaded: true,
           data: action.allOrders
+        }
+      }
+
+    // ------------------------------------------------------------------------------
+    // CANCELLING ORDERS
+    case 'ORDER_CANCEL_REQUEST':
+      return {
+        ...state,
+        transaction: {
+          transactionType: 'Cancel',
+          isPending: true,
+          isSuccessful: false
+        }
+      }
+
+    case 'ORDER_CANCEL_SUCCESS':
+      return {
+        ...state,
+        transaction: {
+          transactionType: 'Cancel',
+          isPending: false,
+          isSuccessful: true
+        },
+        cancelledOrders: {
+          ...state.cancelledOrders,
+          data: [
+            ...state.cancelledOrders.data,
+            action.order
+          ]
+        },
+        events: [action.event, ...state.events]
+      }
+
+    case 'ORDER_CANCEL_FAIL':
+      return {
+        ...state,
+        transaction: {
+          transactionType: 'Cancel',
+          isPending: false,
+          isSuccessful: false,
+          isError: true
         }
       }
 
@@ -160,54 +208,57 @@ export const exchange = (state = DEFAULT_EXCHANGE_STATE, action) => {
 
         },
         transferInProgress: false
-      }  
-     ///--------------------------
-     ////MAKING ORDERS CASES----------------------------------------
+      }
+
+    // ------------------------------------------------------------------------------
+    // MAKING ORDERS CASES
 
     case 'NEW_ORDER_REQUEST':
       return {
         ...state,
         transaction: {
           transactionType: 'New Order',
-          isPending:true,
-          isSuccessful:false
+          isPending: true,
+          isSuccessful: false
         },
       }
+
     case 'NEW_ORDER_SUCCESS':
-      //Prevent duplicate orders
+      // Prevent duplicate orders
       index = state.allOrders.data.findIndex(order => order.id.toString() === action.order.id.toString())
-      
+
       if(index === -1) {
         data = [...state.allOrders.data, action.order]
       } else {
         data = state.allOrders.data
       }
-      //pin orders with allOrders pbject
+
       return {
         ...state,
         allOrders: {
           ...state.allOrders,
-          data //data is an array status of orders, when we load the order book
+          data
         },
         transaction: {
-        transactionType: 'New Order',
-        isPending:false,
-        isSuccessful:true
+          transactionType: 'New Order',
+          isPending: false,
+          isSuccessful: true
         },
-        events: [action.event, ...state.events] // add to the events like transger in progress
+        events: [action.event, ...state.events]
       }
+
     case 'NEW_ORDER_FAIL':
       return {
         ...state,
         transaction: {
           transactionType: 'New Order',
-          isPending:true,
-          isSuccessful:false,
-          isError:true
+          isPending: false,
+          isSuccessful: false,
+          isError: true
         },
       }
+
       default:
         return state
-  
   }
 }
