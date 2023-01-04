@@ -1,7 +1,6 @@
 import { useEffect } from 'react';
 import { useDispatch } from 'react-redux';
 import config from '../config.json';
-
 import {
   loadProvider,
   loadNetwork,
@@ -20,7 +19,7 @@ import PriceChart from './PriceChart'
 import Transactions from './Transactions'
 import Trades from './Trades'
 import OrderBook from './OrderBook'
-
+import Alert from './Alert'
 function App() {
   const dispatch = useDispatch()
 
@@ -89,7 +88,7 @@ function App() {
         </section>
       </main>
 
-      {/* Alert */}
+      <Alert />
 
     </div>
   );
